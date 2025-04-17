@@ -9,17 +9,17 @@ public class WorldPoint : MonoBehaviour
     [SerializeField] PointType type;
     [SerializeField] Transform additionalPosition;
     
-    void Start()
+    void Awake()
     {
-        if (points[type] == null)
+        if (!points.ContainsKey(type))
         {
-            points[type] = new List<MapPoint>();
+            points.Add(type,new List<MapPoint>());
         }
         points[type].Add(new MapPoint(transform.position, additionalPosition.position));
         Destroy(gameObject);
     }
 
-    static Dictionary<PointType, List<MapPoint>> points;
+    static Dictionary<PointType, List<MapPoint>> points = new Dictionary<PointType, List<MapPoint>>();
 
     public static MapPoint GetPoint(PointType type, int exceptionCounter = 0)
     {
@@ -42,7 +42,7 @@ public class MapPoint
 {
     public Vector3 pos;
     public Vector3 additionalPos;
-    public bool isFree;
+    public bool isFree = true;
     public MapPoint(Vector3 point,Vector3 additionalPoint)
     {
         this.pos = point;
@@ -55,4 +55,5 @@ public enum PointType
     Rest,
     Work,
     Enter,
+    Dialog,
 }

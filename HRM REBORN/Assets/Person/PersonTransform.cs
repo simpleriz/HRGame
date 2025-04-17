@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEditor;
 using UnityEditor.Tilemaps;
 using UnityEngine;
@@ -8,10 +9,23 @@ public class PersonTransform : MonoBehaviour
 {
     const float speed = 5;
     Coroutine coroutine;
-    public void SetCouutine(IEnumerator rutine)
+    public TaskType taskType { get; private set; }
+
+    private void Start()
     {
-        StopCoroutine(coroutine);
+        WorkTask();
+        Debug.Log(TaskType.imperative < TaskType.important);
+    }
+    bool SetCouutine(IEnumerator rutine, TaskType type)
+    {
+        if (type < taskType) return false;
+        taskType = type;    
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
         coroutine = StartCoroutine(rutine);
+        return true;
     }
     
     bool MoveTo(Vector3 pos, float speed)
@@ -33,19 +47,71 @@ public class PersonTransform : MonoBehaviour
         }
 
     }
-    IEnumerator WorkTask()
-    {
-        var point = WorldPoint.GetPoint(PointType.Work);
 
-        while (true)
+
+    public bool WorkTask()
+    {
+        IEnumerator _coroutine()
         {
-            if (MoveTo(point.pos, speed * Time.deltaTime))
+
+            var point = WorldPoint.GetPoint(PointType.Work);
+
+            while (true)
             {
-                break;
+                yield return null;
+                if (MoveTo(point.pos, speed * Time.deltaTime))
+                {
+                    break;
+                }
             }
-            yield return null;
         }
+        return SetCouutine(_coroutine(), TaskType.common);
+    }
+
+    public bool DialogTask(PersonTransform companion)
+    {
+        if(taskType > TaskType.imperative || companion.taskType > TaskType.imperative)
+        {
+            return false;
+        }
+        var point = WorldPoint.GetPoint(PointType.Dialog);
+        IEnumerator _coroutine()
+        {   
+            while (true)
+            {
+                yield return null;
+                if (MoveTo(point.pos, speed * Time.deltaTime))
+                {
+                    break;
+                }
+            }
+        }
+        SetCouutine(_coroutine(), TaskType.important);
+        companion.DialogCompanionTask(point);
+        return true;
+    }
+
+    public bool DialogCompanionTask(MapPoint point)
+    {
+        IEnumerator _coroutine()
+        {
+            while (true)
+            {
+                yield return null;
+                if (MoveTo(point.additionalPos, speed * Time.deltaTime))
+                {
+                    break;
+                }
+            }
+        }
+        return SetCouutine(_coroutine(), TaskType.important);
     }
 }
 
 
+public enum TaskType
+{
+    common, // work, rest
+    important, // dialog
+    imperative, // death, wound
+}
