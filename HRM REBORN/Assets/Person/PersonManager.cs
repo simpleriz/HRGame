@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 public class PersonManager : MonoBehaviour
 {
-    List<PersonIdentety> persons = new List<PersonIdentety>();
+    public List<PersonIdentety> persons { get; private set; } = new List<PersonIdentety>();
     static public PersonManager Instance;
     void Awake()
     {
@@ -22,7 +22,7 @@ public class PersonManager : MonoBehaviour
         }
     }
     
-    public void RegisterNewPerson(PersonIdentety _person)
+    public void RegisterPerson(PersonIdentety _person)
     {
         persons.Add(_person);
     }

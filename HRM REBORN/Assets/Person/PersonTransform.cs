@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class PersonTransform : MonoBehaviour
 {
+    [SerializeField] PersonIdentety personIdentety;
     const float speed = 5;
     Coroutine coroutine;
     public TaskType taskType { get; private set; }
@@ -84,6 +85,21 @@ public class PersonTransform : MonoBehaviour
                 {
                     break;
                 }
+            }
+
+            yield return new WaitForSeconds(3f);
+
+            float chance1 = personIdentety.CalculateConflictChance(companion.personIdentety);
+            float chance2 = companion.personIdentety.CalculateConflictChance(companion.personIdentety);
+            float dice = Random.Range(1, 101);
+            bool isConflic = chance1 + chance2 >= dice;
+
+            personIdentety.AddDebugNote($"===ConflicChanceInDialog===\nI am own of dialog\nmy chance = {chance1}\ncompanion chance = {chance2}\ndice = {dice}\nresult {isConflic}");
+            companion.personIdentety.AddDebugNote($"===ConflicChanceInDialog===\nmy chance = {chance2}\ncompanion chance = {chance1}\ndice = {dice}\nresult: {isConflic}");
+
+            if (isConflic)
+            {
+
             }
         }
         SetCouutine(_coroutine(), TaskType.important);

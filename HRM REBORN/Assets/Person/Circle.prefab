@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc115ba3079318a4088343fe2ebf67d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  personIdentety: {fileID: 3858694153486492981}
 --- !u!114 &3858694153486492981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,3 +112,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debug: 
+  personTransform: {fileID: 7009037997789222404}

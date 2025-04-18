@@ -31,7 +31,6 @@ public class TimeManager : MonoBehaviour
     IEnumerator TimeUpdater()
     {
         yield return null;
-
         while (true)
         {
             yield return new WaitForSeconds(minuteDuration);

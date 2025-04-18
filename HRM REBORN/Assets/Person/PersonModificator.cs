@@ -12,6 +12,11 @@ public abstract class PersonModificator
         return true;
     }
 
+    public virtual float CalculateConflictChance(PersonIdentety person)
+    {
+        return 0;
+    }
+
     public virtual string DebugInfo()
     {
         return "=====" + this.ToString() + "=====";
