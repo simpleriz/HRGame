@@ -14,21 +14,9 @@ class PersonGenerator : MonoBehaviour
 
     static PersonIdentety person;
     int weight;
-    static PersonGenerator Instance;
+    public static PersonGenerator Instance;
 
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    public void CreateNewPerson()
+    public PersonIdentety CreateNewPerson()
     {
         GameObject _person = Instantiate(personPrefab);
 
@@ -70,6 +58,8 @@ class PersonGenerator : MonoBehaviour
             height = Random.Range(140, 190);
         }
 
+        height = height / 100;
+
         if (Random.Range(0, 2) == 1)
         {
             age = GenerateRandomAge();
@@ -85,10 +75,11 @@ class PersonGenerator : MonoBehaviour
 
         stats.education = education;
         stats.age = age;
-        stats.height = height / 100;
-        stats.weight = weight;
+        stats.height = height;
+        stats.weight = personWeight;
 
-        //return new PersonIdentety(age, sex, personWeight, height, PersonOrentation.hetero, education, features);
+        Debug.Log(person.ToString());
+        return person;
     }
 
     PersonEducation GenerateEducation()
@@ -116,7 +107,7 @@ class PersonGenerator : MonoBehaviour
     {
         int minW = minGW - weight;//-5 - 0
         int maxW = maxGW - weight;//0 - 5
-        var _weight = weights.Where(i => i.weight >= minW & maxW >= i.weight).OrderBy(i => Random.value).ElementAt(0);
+        var _weight = weights.Where(i => (i.weight >= minW & maxW >= i.weight)).OrderBy(i => Random.value).ElementAt(0);
 
         weight += _weight.weight;
         return _weight.GetValue(height);
@@ -150,8 +141,16 @@ class PersonGenerator : MonoBehaviour
         weight += feature.weight + 1;
         person.AddModificator((PersonModificator)Activator.CreateInstance(feature.type));
     }
-    void Start()
+    void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         //men common features
         mansCommonFeatures.Add(new FeatureItem(typeof(AlcoholicMod), false));
         mansCommonFeatures.Add(new FeatureItem(typeof(WhinerMod), true));
@@ -202,7 +201,6 @@ class PersonGenerator : MonoBehaviour
         educations.Add(new EducationItem(PersonEducation.Bachelor, 0));                   //бакалавр 0
         educations.Add(new EducationItem(PersonEducation.Master, -1));                    //магистр 1
         educations.Add(new EducationItem(PersonEducation.ScienceDoctor, -2));             //доктор наук 2
-        CreateNewPerson();
     }
 
 
