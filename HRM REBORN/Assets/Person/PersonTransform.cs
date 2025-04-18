@@ -87,15 +87,27 @@ public class PersonTransform : MonoBehaviour
                 }
             }
 
-            yield return new WaitForSeconds(3f);
-
-            float chance1 = personIdentety.CalculateConflictChance(companion.personIdentety);
-            float chance2 = companion.personIdentety.CalculateConflictChance(companion.personIdentety);
+            yield return new WaitForSeconds(1.5f);
+            //couple
+            float chance1 = personIdentety.CalculateCoupleChance(companion.personIdentety);
+            float chance2 = companion.personIdentety.CalculateCoupleChance(companion.personIdentety);
             float dice = Random.Range(1, 101);
+            bool isCouple = chance1 + chance2 >= dice;
+
+            personIdentety.AddDebugNote($"===CoupleChanceInDialog===\nI am own of dialog\ncompanion={companion.gameObject.name}\nmy chance = {chance1}\ncompanion chance = {chance2}\ndice = {dice}\nresult {isCouple}");
+            companion.personIdentety.AddDebugNote($"===CoupleChanceInDialog===\ncompanion={gameObject.name}\nmy chance = {chance2}\ncompanion chance = {chance1}\ndice = {dice}\nresult: {isCouple}");
+
+
+
+            yield return new WaitForSeconds(1.5f);
+            //conflic
+            chance1 = personIdentety.CalculateConflictChance(companion.personIdentety);
+            chance2 = companion.personIdentety.CalculateConflictChance(companion.personIdentety);
+            dice = Random.Range(1, 101);
             bool isConflic = chance1 + chance2 >= dice;
 
-            personIdentety.AddDebugNote($"===ConflicChanceInDialog===\nI am own of dialog\nmy chance = {chance1}\ncompanion chance = {chance2}\ndice = {dice}\nresult {isConflic}");
-            companion.personIdentety.AddDebugNote($"===ConflicChanceInDialog===\nmy chance = {chance2}\ncompanion chance = {chance1}\ndice = {dice}\nresult: {isConflic}");
+            personIdentety.AddDebugNote($"===ConflicChanceInDialog===\nI am own of dialog\ncompanion={companion.gameObject.name}\nmy chance = {chance1}\ncompanion chance = {chance2}\ndice = {dice}\nresult {isConflic}");
+            companion.personIdentety.AddDebugNote($"===ConflicChanceInDialog===\ncompanion={gameObject.name}\nmy chance = {chance2}\ncompanion chance = {chance1}\ndice = {dice}\nresult: {isConflic}");
 
             if (isConflic)
             {
