@@ -8,7 +8,7 @@ public class TimeManager : MonoBehaviour
 
     public int actuallyMinute;
     public UnityEvent OnMinute = new UnityEvent();
-    const float minuteDuration = 1;
+    public const float minuteDuration = 1;
     static public TimeManager Instance;
 
     void Awake()

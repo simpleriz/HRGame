@@ -41,7 +41,10 @@ public class EventManager : MonoBehaviour
             person.transform.position = WorldPoint.GetPoint(PointType.Rest).pos;
             PersonManager.Instance.RegisterPerson(person);
         }
+    }
 
-
+    public void GenerateDayEvents()
+    {
+        new StartWorkDayEvent(30);
     }
 }
