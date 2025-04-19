@@ -71,6 +71,11 @@ public abstract class PersonModificator
     public virtual void OnCoflictEnd(PersonIdentety person, bool isWin)
     {
     }
+
+    public virtual PersonIdentety GetDialogCompanion(PersonIdentety _person) 
+    { 
+        return _person; 
+    }
 }
 
 public enum PersonSex
@@ -160,6 +165,8 @@ public class BasicStats : PersonModificator
 
 public class TeamMember : PersonModificator
 {
+    public List<PersonIdentety> companions = new List<PersonIdentety>();
+
     public bool isActive = false;
     public int energy = 3;
 
@@ -174,6 +181,8 @@ public class TeamMember : PersonModificator
         {
             identety.personTransform.WorkTask();
             energy--;
+
+            companions = PersonManager.Instance.persons.Where(i => i.GetModificator<TeamMember>().isActive).ToList().OrderBy(i => Random.Range(0f,1f)).ToList();
         }
         else
         {
@@ -184,6 +193,23 @@ public class TeamMember : PersonModificator
                 energy = maxEnergy;
             }
         }
+    }
+
+    public override PersonIdentety GetDialogCompanion(PersonIdentety _person)
+    {
+        if (_person == null & companions.Count > 0)
+        {
+            var person = companions[0];
+
+            companions.RemoveAt(0);
+
+            if(person == null)
+            {
+                return GetDialogCompanion(null);
+            }
+            return person;
+        }
+        return _person;
     }
 }
 
@@ -215,14 +241,99 @@ public class NightSuicideMod : PersonModificator
     }
 }
 
+public class EffencityDebuffMod : PersonModificator
+{
+    float value;
+    public EffencityDebuffMod(float value)
+    {
+        this.value = value;
+    }
+
+    public override float CalculateWorkEffencity()
+    {
+        return value;
+    }
+
+    public override void OnNight()
+    {
+        identety.modificators.Remove(this);
+    }
+}
+
+public class BingeMod : PersonModificator
+{
+    const float stopChance = 50;
+    int days = 0;
+    string debug = "";
+    public override void OnNight()
+    {
+        days++;
+        if(days == 3)
+        {
+            identety.Death();
+        }
+        else
+        {
+            var dice = Random.Range(0, 101);
+            var result = dice <= stopChance;
+
+            debug += $"\nstop binge: chance={stopChance}  dice={dice}  result={result}";
+
+            if (result)
+            {
+                identety.modificators.Remove(this);
+            }
+        }
+    }
+
+    public override bool IsCapacity()
+    {
+        return false;
+    }
+
+    public override string DebugInfo()
+    {
+        return base.DebugInfo()+$"days={days}"+debug;
+    }
+}
 
 public class AlcoholicMod : PersonModificator
 {
+    const float startBingeChance = 10;
+    string debug = "";
+    public override void OnNight()
+    {
+        var dice = Random.Range(1, 101);
+        var result = dice <= startBingeChance;
 
+        debug += $"\nbinge: chance={startBingeChance}  dice:{dice}  result:{result}";
+
+        if (result)
+        {
+            identety.modificators.Add(new BingeMod());
+        }
+    }
+
+    public override string DebugInfo()
+    {
+        return base.DebugInfo() + debug;
+    }
 }
 
 public class WhinerMod : PersonModificator
 {
+    const float effencityDebuff = -10;
+
+    public override float CalculateDialogDuration(PersonIdentety person)
+    {
+        person.AddModificator(new EffencityDebuffMod(effencityDebuff));
+        return base.CalculateDialogDuration(person);
+    }
+
+    public override float CalculateWorkEffencity()
+    {
+        return effencityDebuff;
+    }
 
 }
 
@@ -280,7 +391,27 @@ public class BodybuilderMod : PersonModificator
 
 public class SchizophrenicMod : PersonModificator
 {
+    const float conflicChance = 25;
+    bool selfDialog = false;
+    public override void OnNight()
+    {
+        selfDialog = true;
+    }
 
+    public override PersonIdentety GetDialogCompanion(PersonIdentety _person)
+    {
+        if (selfDialog)
+        {
+            selfDialog = false;
+            return identety;
+        }
+        return _person;
+    }
+
+    public override float CalculateConflictChance(PersonIdentety person)
+    {
+        return conflicChance;
+    }
 }
 
 public class WarhammerMod : PersonModificator

@@ -40,6 +40,15 @@ public class PersonIdentety : MonoBehaviour
         DestroyPerson();
     }
 
+    public PersonIdentety GetDialogCompanion()
+    {
+        PersonIdentety _identety = null;
+        foreach(var mod in modificators)
+        {
+            _identety = mod.GetDialogCompanion(_identety);
+        }
+        return _identety;
+    }
     public void Death()
     {
         foreach (var mod in modificators)
