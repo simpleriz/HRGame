@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEditor;
-using UnityEditor.Tilemaps;
 using UnityEngine;
 
 public class PersonTransform : MonoBehaviour
@@ -14,8 +13,7 @@ public class PersonTransform : MonoBehaviour
 
     private void Start()
     {
-        WorkTask();
-        Debug.Log(TaskType.imperative < TaskType.important);
+
     }
     bool SetCouutine(IEnumerator rutine, TaskType type)
     {
@@ -49,6 +47,24 @@ public class PersonTransform : MonoBehaviour
 
     }
 
+    public bool RestTask()
+    {
+        IEnumerator _coroutine()
+        {
+
+            var point = WorldPoint.GetPoint(PointType.Rest);
+
+            while (true)
+            {
+                yield return null;
+                if (MoveTo(point.pos, speed * Time.deltaTime))
+                {
+                    break;
+                }
+            }
+        }
+        return SetCouutine(_coroutine(), TaskType.common);
+    }
 
     public bool WorkTask()
     {
@@ -69,9 +85,10 @@ public class PersonTransform : MonoBehaviour
         return SetCouutine(_coroutine(), TaskType.common);
     }
 
-    public bool DialogTask(PersonTransform companion)
+    public bool DialogTask()
     {
-        if(taskType > TaskType.imperative || companion.taskType > TaskType.imperative)
+        PersonTransform companion = personIdentety.GetDialogCompanion().personTransform;
+        if (taskType > TaskType.imperative || companion.taskType > TaskType.imperative)
         {
             return false;
         }
@@ -97,6 +114,16 @@ public class PersonTransform : MonoBehaviour
             personIdentety.AddDebugNote($"===CoupleChanceInDialog===\nI am own of dialog\ncompanion={companion.gameObject.name}\nmy chance = {chance1}\ncompanion chance = {chance2}\ndice = {dice}\nresult {isCouple}");
             companion.personIdentety.AddDebugNote($"===CoupleChanceInDialog===\ncompanion={gameObject.name}\nmy chance = {chance2}\ncompanion chance = {chance1}\ndice = {dice}\nresult: {isCouple}");
 
+            if (isCouple)
+            {
+                var _mod = new CoupleMod();
+                _mod.person = companion.personIdentety;
+                personIdentety.AddModificator(_mod);
+
+                _mod = new CoupleMod();
+                _mod.person = personIdentety;
+                companion.personIdentety.AddModificator(_mod);
+            }
 
 
             yield return new WaitForSeconds(1.5f);
@@ -113,11 +140,17 @@ public class PersonTransform : MonoBehaviour
             {
 
             }
+            else
+            {
+                companion.WorkTask();
+                WorkTask();
+            }
         }
         SetCouutine(_coroutine(), TaskType.important);
         companion.DialogCompanionTask(point);
         return true;
     }
+
 
     public bool DialogCompanionTask(MapPoint point)
     {

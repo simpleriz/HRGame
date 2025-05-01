@@ -54,6 +54,8 @@ public abstract class PersonModificator
     }
 
     public virtual void OnFire() { }
+
+    //Subscribe on Timemanager event in PersonIdentety 
     public virtual void OnNight() { }
 
     public virtual void OnDeath() { }
@@ -102,8 +104,8 @@ public enum PersonEducation
 
 public enum PersonOrientation
 {
-    Hetero,
     Gay,
+    Hetero,
     Bi,
     A,
 }
@@ -118,6 +120,7 @@ public class BasicStats : PersonModificator
     public float height;
     public int age;
     public int weight;
+    public int seed;
 
     public override float CalculateCoupleChance(PersonIdentety person)
     {
@@ -182,7 +185,7 @@ public class TeamMember : PersonModificator
             identety.personTransform.WorkTask();
             energy--;
 
-            companions = PersonManager.Instance.persons.Where(i => i.GetModificator<TeamMember>().isActive).ToList().OrderBy(i => Random.Range(0f,1f)).ToList();
+            companions = PersonManager.Instance.persons.Where(i => i.GetModificator<TeamMember>().isActive & i.Equals(identety) == false).ToList().OrderBy(i => Random.Range(0f,1f)).ToList();
         }
         else
         {
@@ -210,6 +213,11 @@ public class TeamMember : PersonModificator
             return person;
         }
         return _person;
+    }
+
+    public override string DebugInfo()
+    {
+        return base.DebugInfo() + $"\nenergy: {energy}/{identety.CalculateMaxEnergy()}";
     }
 }
 
@@ -339,7 +347,7 @@ public class WhinerMod : PersonModificator
 
 public class JoillerMod : PersonModificator
 {
-
+    public const float dialogChance = 50;
 }
 
 public class BodybuilderMod : PersonModificator
@@ -524,6 +532,15 @@ public class JewishMod : PersonModificator
         }
 
         return 0;
+    }
+
+    public override bool IsCapacity()
+    {
+        if(TimeManager.Instance.day == 5)
+        {
+            return false;
+        }
+        return true;
     }
 }
 

@@ -1,13 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
 
 public class PersonIdentety : MonoBehaviour
 {
-    [TextArea(10, 100), SerializeField] string debug;
+    [TextArea(10, 100)] public string debug;
     public List<PersonModificator> modificators { get; private set; } = new List<PersonModificator>();
     public PersonTransform personTransform;
 
@@ -156,10 +155,12 @@ public class PersonIdentety : MonoBehaviour
     {
         _mod.identety = this;
         modificators.Add(_mod);
+        TimeManager.Instance.OnNight.AddListener(_mod.OnNight);
     }
 
     private void FixedUpdate()
     {
+
         debug = "=====MODIFICATORS=====\n\n";
         foreach (var mod in modificators)
         {

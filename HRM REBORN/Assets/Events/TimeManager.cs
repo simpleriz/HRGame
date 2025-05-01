@@ -5,11 +5,15 @@ using UnityEngine.Events;
 
 public class TimeManager : MonoBehaviour
 {
-
+    public int day = -1;
     public int actuallyMinute;
     public UnityEvent OnMinute = new UnityEvent();
-    public const float minuteDuration = 1;
+    public const float minuteDuration = 15/10;
     static public TimeManager Instance;
+
+    //events
+    public UnityEvent OnNight = new UnityEvent();
+    public UnityEvent OnDay = new UnityEvent();
 
     void Awake()
     {
@@ -31,9 +35,22 @@ public class TimeManager : MonoBehaviour
     IEnumerator TimeUpdater()
     {
         yield return null;
+        actuallyMinute = 0;
+        day++;
+        OnDay.Invoke();
+        yield return null;
         while (true)
         {
-            yield return new WaitForSeconds(minuteDuration);
+            if (Console.Instance.skipTime > 0)
+            {
+                yield return new WaitForSeconds(minuteDuration/250);
+                Console.Instance.skipTime--;
+            }
+            else
+            {
+                yield return new WaitForSeconds(minuteDuration);
+            }
+            
             actuallyMinute++;
             OnMinute.Invoke();
         }

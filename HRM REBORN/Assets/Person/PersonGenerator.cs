@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
-using Random = UnityEngine.Random;
+//using Random = UnityEngine.Random;
 
 class PersonGenerator : MonoBehaviour
 {
@@ -15,9 +16,15 @@ class PersonGenerator : MonoBehaviour
     static PersonIdentety person;
     int weight;
     public static PersonGenerator Instance;
+    System.Random random;
 
-    public PersonIdentety CreateNewPerson()
+    public PersonIdentety CreateNewPerson(int seed = 0)
     {
+        if(seed == 0)
+        {
+            seed = UnityEngine.Random.Range(-999999, 999999);
+        }
+        random = new System.Random(seed);
         GameObject _person = Instantiate(personPrefab);
 
         _person.transform.position = transform.position;
@@ -26,7 +33,7 @@ class PersonGenerator : MonoBehaviour
         weight = 0;
 
         PersonSex sex = PersonSex.Man;
-        if (Random.Range(0, 2) == 1)
+        if (random.Next(0, 2) == 1)
         {
             sex = PersonSex.Woman;
         }
@@ -34,13 +41,14 @@ class PersonGenerator : MonoBehaviour
 
         stats.status = PersonStatus.hidden;
         stats.sex = sex;
+        stats.seed = seed;
 
         person.AddModificator(stats);
 
         GenerateRandomFeatures();
 
 
-        if (Random.Range(0, 4) == 3)
+        if (random.Next(0, 4) == 3)
         {
             GenerateRandomNationalFeature();
         }
@@ -51,16 +59,16 @@ class PersonGenerator : MonoBehaviour
 
         if (sex == PersonSex.Man)
         {
-            height = Random.Range(160, 210);
+            height = random.Next(160, 210);
         }
         else
         {
-            height = Random.Range(140, 190);
+            height = random.Next(140, 190);
         }
 
         height = height / 100;
 
-        if (Random.Range(0, 2) == 1)
+        if (random.Next(0, 2) == 1)
         {
             age = GenerateRandomAge();
             personWeight = GenerateRandomWeight(height);
@@ -73,12 +81,30 @@ class PersonGenerator : MonoBehaviour
 
         PersonEducation education = GenerateEducation();
 
+        int orientationChance = random.Next(1, 101);
+
+        if(orientationChance <= 50)
+        {
+            stats.orientation = PersonOrientation.Hetero;
+        }
+        else if (orientationChance <= 70)
+        {
+            stats.orientation = PersonOrientation.Gay;
+        }
+        else if (orientationChance <= 90)
+        {
+            stats.orientation = PersonOrientation.Bi;
+        }
+        else
+        {
+            stats.orientation = PersonOrientation.A;
+        }
+
         stats.education = education;
         stats.age = age;
         stats.height = height;
         stats.weight = personWeight;
 
-        Debug.Log(person.ToString());
         return person;
     }
 
@@ -97,20 +123,20 @@ class PersonGenerator : MonoBehaviour
         int minW = minGW - weight;//-5 - 0
         int maxW = maxGW - weight;//0 - 5
 
-        var age = ages.Where(i => i.weight >= minW & maxW >= i.weight).OrderBy(i => Random.value).ElementAt(0);
+        var age = ages.Where(i => i.weight >= minW & maxW >= i.weight).OrderBy(i => (float)random.NextDouble()).ElementAt(0);
 
         weight += age.weight;
-        return age.GetValue();
+        return age.GetValue(random);
     }
 
     int GenerateRandomWeight(float height)
     {
         int minW = minGW - weight;//-5 - 0
         int maxW = maxGW - weight;//0 - 5
-        var _weight = weights.Where(i => (i.weight >= minW & maxW >= i.weight)).OrderBy(i => Random.value).ElementAt(0);
+        var _weight = weights.Where(i => (i.weight >= minW & maxW >= i.weight)).OrderBy(i => (float)random.NextDouble()).ElementAt(0);
 
         weight += _weight.weight;
-        return _weight.GetValue(height);
+        return _weight.GetValue(height,random);
     }
 
     void GenerateRandomFeatures()
@@ -120,11 +146,11 @@ class PersonGenerator : MonoBehaviour
 
         if (stats.sex == PersonSex.Man)
         {
-            features = womansCommonFeatures.OrderBy(i => Random.value).Take(2).ToList();
+            features = womansCommonFeatures.OrderBy(i => (float)random.NextDouble()).Take(2).ToList();
         }
         else
         {
-            features = womansCommonFeatures.OrderBy(i => Random.value).Take(2).ToList();
+            features = womansCommonFeatures.OrderBy(i => (float)random.NextDouble()).Take(2).ToList();
         }
 
         foreach (var _feature in features)
@@ -137,7 +163,7 @@ class PersonGenerator : MonoBehaviour
 
     void GenerateRandomNationalFeature()
     {
-        var feature = nationalFeatures[Random.Range(0, nationalFeatures.Count)];
+        var feature = nationalFeatures[random.Next(0, nationalFeatures.Count)];
         weight += feature.weight + 1;
         person.AddModificator((PersonModificator)Activator.CreateInstance(feature.type));
     }
@@ -241,9 +267,9 @@ class PersonGenerator : MonoBehaviour
             this.weight = weight;
         }
 
-        public int GetValue()
+        public int GetValue(System.Random random)
         {
-            return Random.Range(min, max);
+            return random.Next(min, max);
         }
     }
 
@@ -259,9 +285,9 @@ class PersonGenerator : MonoBehaviour
             this.weight = weight;
         }
 
-        public int GetValue(float height)
+        public int GetValue(float height, System.Random random)
         {
-            return Mathf.RoundToInt(Random.Range(min, max) * height * height);
+            return Mathf.RoundToInt(random.Next(min, max) * height * height);
         }
     }
 
