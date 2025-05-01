@@ -9,16 +9,14 @@ public class WindowsController : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     public RectTransform TitleBar;
 
-
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         windowRect = GetComponent<RectTransform>();
-        if (!RectTransformUtility.RectangleContainsScreenPoint(TitleBar, eventData.position, eventData.pressEventCamera))
+        /*if (!RectTransformUtility.RectangleContainsScreenPoint(TitleBar, eventData.position, eventData.pressEventCamera))
         {
             
             return;
-        }
+        }*/
 
         originalMousePosition = eventData.position;
         originalWindowPosition = windowRect.anchoredPosition;
@@ -29,7 +27,6 @@ public class WindowsController : MonoBehaviour, IBeginDragHandler, IDragHandler
         windowRect = GetComponent<RectTransform>();
         if (!RectTransformUtility.RectangleContainsScreenPoint(TitleBar, eventData.position, eventData.pressEventCamera))
         {
-            
             return;
         }
 
